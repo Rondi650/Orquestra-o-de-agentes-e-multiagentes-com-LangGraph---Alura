@@ -8,10 +8,9 @@ from dotenv import load_dotenv
 from typing import TypedDict, Annotated, List
 import operator
 
-from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain_core.pydantic_v1 import BaseModel
+from langchain_openai import ChatOpenAI
+from  pydantic import BaseModel
 from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
-from langchain.chains import create_structured_output_runnable
 from tavily import TavilyClient
 
 from langgraph.graph import StateGraph, END
@@ -23,7 +22,7 @@ import sqlite3
 load_dotenv()
 
 # Define as variáveis de ambiente
-os.environ['GOOGLE_API_KEY'] = os.getenv('GEMINI_API_KEY')
+os.environ['OPENAI_API_KEY'] = os.getenv('OPENAI_API_KEY')
 os.environ['TAVILY_API_KEY'] = os.getenv('TAVILY_API_KEY')
 
 
@@ -48,7 +47,7 @@ conn = sqlite3.connect("checkpoints.db", check_same_thread=False)
 memory = SqliteSaver(conn)
 
 # Inicializa o modelo de linguagem
-model = ChatGoogleGenerativeAI(model="gemini-1.5-flash", temperature=0)
+model = ChatOpenAI(model="gpt-5.1-2025-11-13", temperature=0)
 
 # Cria um Runnable para a saída estruturada (forma correta para Gemini)
 structured_model = model.with_structured_output(Queries)
@@ -175,7 +174,6 @@ builder.add_edge("research_critique", "generate")
 
 graph = builder.compile(checkpointer=memory)
 
-# Exemplo de como rodar o grafo (o Gradio fará isso por você)
 # thread = {"configurable": {"thread_id": "1"}}
 # for s in graph.stream({
 #     'task': "Qual é a diferença entre o langchain e langsmith",
